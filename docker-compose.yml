@@ -1,0 +1,32 @@
+services:
+
+#MariaDB (AWS RDS compatible)
+mariadb:
+  image: mariadb:10.11
+  container_name: graff-mariadb 
+  restart: unless-stopped  
+  environment:
+    - MYSQL_DATABASE=${MARIADB_PASSWORD}
+    - MYSQL_USER=${MARIADB_PASSWORD}
+    - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+  volumes:
+    - mariadb_data:/var/lib/mysql
+    - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+  ports:
+    - "3306:3306"
+  networks:
+    - brickyard
+  healthcheck:
+    test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+
+volumes:
+  mariadb_data:
+
+networks:
+  default:
+    name: brickyard
